@@ -15,27 +15,27 @@ app.use('/public', express.static(path.join(__dirname, 'public')))
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 
-var mongoDB = 'mongodb://127.0.0.1/chat';
-mongoose.connect(mongoDB);
+//var mongoDB = 'mongodb://127.0.0.1/chat';
+//mongoose.connect(mongoDB);
 
 //Get the default connection
-var db = mongoose.connection;
+//var db = mongoose.connection;
 
-var bookSchema = mongoose.Schema({
+/*var bookSchema = mongoose.Schema({
   name: String,
   //Also creating index on field isbn
   isbn: {type: String, index: true},
   author: String,
   pages: Number
-});
+});*/
 
 //Bind connection to error event (to get notification of connection errors)
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+//db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
 passport.use(new Strategy({
     clientID: '131568380325049',
     clientSecret: '955090e0aac14c9751adf91e11d7419f',
-    callbackURL: 'http://localhost:5000/login/facebook/return'
+    callbackURL: 'https://om-chat.herokuapp.com//login/facebook/return'
 },
 
 function(accessToken, refreshToken, profile, cb) {
