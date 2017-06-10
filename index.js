@@ -15,6 +15,11 @@ app.use('/public', express.static(path.join(__dirname, 'public')))
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 
+app.set('fb-callbackurl', 'https://om-chat.herokuapp.com/login/facebook/return');
+app.set('express-secret', 'TRR36PDTHB9XBHCPPYQKGBPKQ');
+
+//'https://om-chat.herokuapp.com//login/facebook/return'
+
 //var mongoDB = 'mongodb://127.0.0.1/chat';
 //mongoose.connect(mongoDB);
 
@@ -35,7 +40,7 @@ app.set('view engine', 'ejs');
 passport.use(new Strategy({
     clientID: '131568380325049',
     clientSecret: '955090e0aac14c9751adf91e11d7419f',
-    callbackURL: 'https://om-chat.herokuapp.com//login/facebook/return'
+    callbackURL: app.get('fb-callbackurl')
 },
 
 function(accessToken, refreshToken, profile, cb) {
@@ -69,7 +74,7 @@ passport.deserializeUser(function(obj, cb) {
 app.use(require('morgan')('combined'));
 app.use(require('cookie-parser')());
 app.use(require('body-parser').urlencoded({ extended: true }));
-app.use(require('express-session')({ secret: 'keyboard cat', resave: true, saveUninitialized: true }));
+app.use(require('express-session')({ secret: app.get('express-secret'), resave: true, saveUninitialized: true }));
 
 // Initialize Passport and restore authentication state, if any, from the
 // session.
