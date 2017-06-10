@@ -15,7 +15,7 @@ app.use('/public', express.static(path.join(__dirname, 'public')))
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 
-app.set('fb-callbackurl', 'https://om-chat.herokuapp.com/login/facebook/return');
+app.set('fb-callbackurl', 'http://localhost:5000/login/facebook/return');
 app.set('express-secret', 'TRR36PDTHB9XBHCPPYQKGBPKQ');
 
 //'https://om-chat.herokuapp.com//login/facebook/return'

@@ -19,14 +19,20 @@
   $(function () {
     var socket = io();
     $('form').submit(function(){
-      socket.emit('chat message', $('#m').val());
+      var loginDetails={  
+          msg : $('#m').val(),  
+          fb_userid : "<%=user.id%>",
+          fb_username : "<%=user.displayName%>"
+      };
+      socket.emit('chat message', loginDetails);
       $('#m').val('');
       return false;
     });
     socket.on('chat message', function(msg){
-      if(msg.length > 0) {
-        $('#messages').append('<li><img src="https://graph.facebook.com/<%=user.id%>/picture?width=40&height=40" /> <%=user.displayName%> ' + msg);
-      }
+      
+        console.log(msg);
+        $('#messages').append('<li><img src="https://graph.facebook.com/'+msg.fb_userid+'/picture?width=40&height=40" /> '+msg.fb_username+' ' + msg.msg);
+      
     });
   });
 </script>
