@@ -24,7 +24,6 @@
       socket.emit("fetch previous", room);
     });
     socket.on("fetch previous", function(prevMsg) {
-      console.log(prevMsg);
       for(var i=0; i < prevMsg.length; i++) {
         $('#messages').append("<li><img src="+prevMsg[i].picDisplay+" />  "+prevMsg[i].displayName+" "+prevMsg[i].chatMessage +"");
       }

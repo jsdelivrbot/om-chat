@@ -26,6 +26,7 @@ app.set('mongo-db-url', 'mongodb://root:root@ds125262.mlab.com:25262/heroku_042n
 //'https://om-chat.herokuapp.com/login/facebook/return'
 //http://localhost:5000/login/facebook/return
 //mongodb://127.0.0.1:27017/chat
+//mongodb://root:root@ds125262.mlab.com:25262/heroku_042ngn9t
 
 var mongoDB = app.get('mongo-db-url');
 mongoose.connect(mongoDB);
@@ -131,7 +132,7 @@ nameSpace.on('connection', function(socket){
         });
     });
   socket.on('chat message', function(msg){
-    socket.in('chat message', msg);
+    socket.emit('chat message', msg);
     var newchat = ChatModel({
         fbId: msg.fb_userid,
         displayName: msg.fb_username,
@@ -145,7 +146,7 @@ nameSpace.on('connection', function(socket){
   });
 
   socket.on('fetch previous', function(room){
-      ChatModel.find({chatRoom: {$eq: 'room12345'}}, 'displayName picDisplay chatMessage', function(err, data){
+      ChatModel.find({chatRoom: {$eq: rm}}, 'displayName picDisplay chatMessage', function(err, data){
           if(err) throw err;
           socket.emit('fetch previous', data);
       });
