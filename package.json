@@ -10,6 +10,7 @@
     "start": "node index.js"
   },
   "dependencies": {
+    "assert": "^1.4.1",
     "body-parser": "^1.17.2",
     "connect-ensure-login": "^0.1.1",
     "cookie-parser": "^1.4.3",

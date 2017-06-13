@@ -6,6 +6,10 @@ var io = require('socket.io')(http);
 var passport = require('passport');
 var Strategy = require('passport-facebook');
 var mongoose = require('mongoose');
+var assert = require('assert');
+
+var UserModel = require('./models/UserModel.js');
+var ChatModel = require('./models/ChatModel.js');
 
 app.set('port', (process.env.PORT || 5000));
 
@@ -17,15 +21,18 @@ app.set('view engine', 'ejs');
 
 app.set('fb-callbackurl', 'https://om-chat.herokuapp.com/login/facebook/return');
 app.set('express-secret', 'TRR36PDTHB9XBHCPPYQKGBPKQ');
+app.set('mongo-db-url', 'mongodb://root:root@ds125262.mlab.com:25262/heroku_042ngn9t');
 
 //'https://om-chat.herokuapp.com/login/facebook/return'
 //http://localhost:5000/login/facebook/return
+//mongodb://127.0.0.1:27017/chat
 
-//var mongoDB = 'mongodb://127.0.0.1/chat';
-//mongoose.connect(mongoDB);
+var mongoDB = app.get('mongo-db-url');
+mongoose.connect(mongoDB);
 
 //Get the default connection
-//var db = mongoose.connection;
+db = mongoose.connection;
+db.on('error', console.error.bind(console, 'DB Connection Error'));
 
 /*var bookSchema = mongoose.Schema({
   name: String,
@@ -98,19 +105,55 @@ app.get('/login/facebook/return',
 app.get('/index',
   require('connect-ensure-login').ensureLoggedIn(),
   function(req, res){
+    var newuser = UserModel({
+        fbId: req.user.id,
+        displayName: req.user.displayName
+    });
+    /*newuser.save(function(err){
+      if(err) throw err;
+    });*/
     res.render('pages/index', { user: req.user });
   });
 
+/*
+Create namespace and rooms
+*/
 
-io.on('connection', function(socket){
-  console.log('a user connected');
+var nameSpace = io.of('/nameSpace');
+
+/* USE THAT NAMESPACE */
+var rm = "";
+nameSpace.on('connection', function(socket){
+  socket.on('enter room', function(room) {
+        rm = room;
+        socket.join(room, function(err){
+          if(err) throw err;
+        });
+    });
   socket.on('chat message', function(msg){
-    io.emit('chat message', msg);
+    socket.emit('chat message', msg);
+    var newchat = ChatModel({
+        fbId: msg.fb_userid,
+        displayName: msg.fb_username,
+        picDisplay: 'https://graph.facebook.com/'+msg.fb_userid+'/picture?width=40&height=40',
+        chatRoom: rm,
+        chatMessage: msg.msg
+    });
+    newchat.save(function(err){
+      if(err) throw err;
+    });
+  });
+
+  socket.on('fetch previous', function(room){
+      ChatModel.find({chatRoom: {$eq: 'room12345'}}, 'displayName picDisplay chatMessage', function(err, data){
+          if(err) throw err;
+          socket.emit('fetch previous', data);
+      });
   });
   socket.on('disconnect', function(){
     console.log('user disconnected');
   });
-})
+});
 
 http.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));
