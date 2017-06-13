@@ -132,7 +132,7 @@ nameSpace.on('connection', function(socket){
         });
     });
   socket.on('chat message', function(msg){
-    socket.broadcast.to(rm).emit('chat message', msg);
+    io.sockets.emit('chat message', msg);
     var newchat = ChatModel({
         fbId: msg.fb_userid,
         displayName: msg.fb_username,
