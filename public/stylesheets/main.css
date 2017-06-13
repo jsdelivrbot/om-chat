@@ -52,7 +52,7 @@ form {
     padding: 10px; }
 
 #messages {
-  max-height: 90%;
+  max-height: 500px;
   overflow: scroll;
   list-style-type: none;
   margin: 0;
