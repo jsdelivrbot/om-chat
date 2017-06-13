@@ -25,7 +25,7 @@
     });
     socket.on("fetch previous", function(prevMsg) {
       for(var i=0; i < prevMsg.length; i++) {
-        $('#messages').append("<li><img src="+prevMsg[i].picDisplay+" />  "+prevMsg[i].displayName+" "+prevMsg[i].chatMessage +"");
+        $('#messages').append("<li><img src="+prevMsg[i].picDisplay+" />  <strong>"+prevMsg[i].displayName+": </strong> "+prevMsg[i].chatMessage +"");
       }
     })
     $('form').submit(function(){
@@ -39,7 +39,7 @@
       return false;
     });
     socket.on('chat message', function(msg){
-        $('#messages').append('<li><img src="https://graph.facebook.com/'+msg.fb_userid+'/picture?width=40&height=40" /> '+msg.fb_username+' ' + msg.msg);
+        $('#messages').append('<li><img src="https://graph.facebook.com/'+msg.fb_userid+'/picture?width=40&height=40" /> <strong>'+msg.fb_username+': </strong>' + msg.msg);
     });
   });
 </script>
