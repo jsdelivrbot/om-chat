@@ -11,6 +11,8 @@ var assert = require('assert');
 var UserModel = require('./models/UserModel.js');
 var ChatModel = require('./models/ChatModel.js');
 
+var usernames = {};
+
 app.set('port', (process.env.PORT || 5000));
 
 app.use('/public', express.static(path.join(__dirname, 'public')))
@@ -125,14 +127,14 @@ var nameSpace = io.of('/nameSpace');
 /* USE THAT NAMESPACE */
 var rm = "";
 nameSpace.on('connection', function(socket){
-  socket.on('enter room', function(room) {
+  nameSpace.on('enter room', function(room) {
         rm = room;
         socket.join(room, function(err){
           if(err) throw err;
         });
     });
   socket.on('chat message', function(msg){
-    io.sockets.in(socket.room).emit('chat message', msg);
+    nameSpace.emit('chat message', msg);
     var newchat = ChatModel({
         fbId: msg.fb_userid,
         displayName: msg.fb_username,
@@ -152,10 +154,10 @@ nameSpace.on('connection', function(socket){
       });
   });
   socket.on('disconnect', function(){
-    console.log('user disconnected');
+    //console.log('user disconnected');
   });
 });
 
 http.listen(app.get('port'), function() {
-  console.log('Node app is running on port', app.get('port'));
+  //console.log('Node app is running on port', app.get('port'));
 });
