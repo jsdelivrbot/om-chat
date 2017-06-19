@@ -11,6 +11,8 @@ var assert = require('assert');
 var UserModel = require('./models/UserModel.js');
 var ChatModel = require('./models/ChatModel.js');
 
+var usernames = {};
+
 app.set('port', (process.env.PORT || 5000));
 
 app.use('/public', express.static(path.join(__dirname, 'public')))
@@ -23,12 +25,20 @@ app.set('fb-callbackurl', 'https://om-chat.herokuapp.com/login/facebook/return')
 app.set('express-secret', 'TRR36PDTHB9XBHCPPYQKGBPKQ');
 app.set('mongo-db-url', 'mongodb://root:root@ds125262.mlab.com:25262/heroku_042ngn9t');
 
+app.set('fb-appid', '131568380325049');
+app.set('fb-appsecret', '955090e0aac14c9751adf91e11d7419f')
+
+app.set('fb-callbacklocal', 'http://192.168.2.222:5000/login/facebook/return')
+app.set('mongo-db-urllocal', 'mongodb://127.0.0.1:27017/chat')
+app.set('fb-appidlocal', '312638455759153')
+app.set('fb-appsecretlocal', '661e41cbc07ff112e9f35fbb1a36a4ce')
+
 //'https://om-chat.herokuapp.com/login/facebook/return'
 //http://localhost:5000/login/facebook/return
 //mongodb://127.0.0.1:27017/chat
 //mongodb://root:root@ds125262.mlab.com:25262/heroku_042ngn9t
 
-var mongoDB = app.get('mongo-db-url');
+var mongoDB = app.get('mongo-db-urllocal');
 mongoose.connect(mongoDB);
 
 //Get the default connection
@@ -47,21 +57,21 @@ db.on('error', console.error.bind(console, 'DB Connection Error'));
 //db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
 passport.use(new Strategy({
-    clientID: '131568380325049',
-    clientSecret: '955090e0aac14c9751adf91e11d7419f',
-    callbackURL: app.get('fb-callbackurl')
-},
+        clientID: app.get('fb-appidlocal'),
+        clientSecret: app.get('fb-appsecretlocal'),
+        callbackURL: app.get('fb-callbacklocal')
+    },
 
-function(accessToken, refreshToken, profile, cb) {
-    // In this example, the user's Facebook profile is supplied as the user
-    // record.  In a production-quality application, the Facebook profile should
-    // be associated with a user record in the application's database, which
-    // allows for account linking and authentication with other identity
-    // providers.
-    return cb(null, profile);
-  }));
+    function(accessToken, refreshToken, profile, cb) {
+        // In this example, the user's Facebook profile is supplied as the user
+        // record.  In a production-quality application, the Facebook profile should
+        // be associated with a user record in the application's database, which
+        // allows for account linking and authentication with other identity
+        // providers.
+        return cb(null, profile);
+    }));
 
-  // Configure Passport authenticated session persistence.
+// Configure Passport authenticated session persistence.
 //
 // In order to restore authentication state across HTTP requests, Passport needs
 // to serialize users into and deserialize users out of the session.  In a
@@ -71,11 +81,11 @@ function(accessToken, refreshToken, profile, cb) {
 // example does not have a database, the complete Facebook profile is serialized
 // and deserialized.
 passport.serializeUser(function(user, cb) {
-  cb(null, user);
+    cb(null, user);
 });
 
 passport.deserializeUser(function(obj, cb) {
-  cb(null, obj);
+    cb(null, obj);
 });
 
 // Use application-level middleware for common functionality, including
@@ -91,30 +101,30 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.get('/', function(request, response) {
-  response.render('pages/login');
+    response.render('pages/login');
 });
 
 app.get('/login/facebook',
-  passport.authenticate('facebook'));
+    passport.authenticate('facebook'));
 
-app.get('/login/facebook/return', 
-  passport.authenticate('facebook', { failureRedirect: '/' }),
-  function(req, res) {
-    res.redirect('/index');
-  });
+app.get('/login/facebook/return',
+    passport.authenticate('facebook', { failureRedirect: '/' }),
+    function(req, res) {
+        res.redirect('/index');
+    });
 
 app.get('/index',
-  require('connect-ensure-login').ensureLoggedIn(),
-  function(req, res){
-    var newuser = UserModel({
-        fbId: req.user.id,
-        displayName: req.user.displayName
+    require('connect-ensure-login').ensureLoggedIn(),
+    function(req, res) {
+        var newuser = UserModel({
+            fbId: req.user.id,
+            displayName: req.user.displayName
+        });
+        /*newuser.save(function(err){
+          if(err) throw err;
+        });*/
+        res.render('pages/index', { user: req.user });
     });
-    /*newuser.save(function(err){
-      if(err) throw err;
-    });*/
-    res.render('pages/index', { user: req.user });
-  });
 
 /*
 Create namespace and rooms
@@ -124,38 +134,38 @@ var nameSpace = io.of('/nameSpace');
 
 /* USE THAT NAMESPACE */
 var rm = "";
-nameSpace.on('connection', function(socket){
-  socket.on('enter room', function(room) {
+nameSpace.on('connection', function(socket) {
+    nameSpace.on('enter room', function(room) {
         rm = room;
-        socket.join(room, function(err){
-          if(err) throw err;
+        socket.join(room, function(err) {
+            if (err) throw err;
         });
     });
-  socket.on('chat message', function(msg){
-    socket.emit('chat message', msg);
-    var newchat = ChatModel({
-        fbId: msg.fb_userid,
-        displayName: msg.fb_username,
-        picDisplay: 'https://graph.facebook.com/'+msg.fb_userid+'/picture?width=40&height=40',
-        chatRoom: rm,
-        chatMessage: msg.msg
+    socket.on('chat message', function(msg) {
+        nameSpace.emit('chat message', msg);
+        var newchat = ChatModel({
+            fbId: msg.fb_userid,
+            displayName: msg.fb_username,
+            picDisplay: 'https://graph.facebook.com/' + msg.fb_userid + '/picture?width=40&height=40',
+            chatRoom: rm,
+            chatMessage: msg.msg
+        });
+        newchat.save(function(err) {
+            if (err) throw err;
+        });
     });
-    newchat.save(function(err){
-      if(err) throw err;
-    });
-  });
 
-  socket.on('fetch previous', function(room){
-      ChatModel.find({chatRoom: {$eq: rm}}, 'displayName picDisplay chatMessage', function(err, data){
-          if(err) throw err;
-          socket.emit('fetch previous', data);
-      });
-  });
-  socket.on('disconnect', function(){
-    console.log('user disconnected');
-  });
+    socket.on('fetch previous', function(room) {
+        ChatModel.find({ chatRoom: { $eq: rm } }, 'displayName picDisplay chatMessage', function(err, data) {
+            if (err) throw err;
+            socket.emit('fetch previous', data);
+        });
+    });
+    socket.on('disconnect', function() {
+        //console.log('user disconnected');
+    });
 });
 
 http.listen(app.get('port'), function() {
-  console.log('Node app is running on port', app.get('port'));
+    //console.log('Node app is running on port', app.get('port'));
 });

@@ -1,47 +1,56 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-  <% include ../partials/header.ejs %>
+    <% include ../partials/header.ejs %>
 </head>
 
 <body>
 
-  <!--<% include ../partials/nav.ejs %>-->
-  <div class="container-fluid">
-    <ul id="messages"></ul>
-    <form action="">
-      <input id="m" autocomplete="off" /><button>Send</button>
-    </form>
-  </div>
-<script src="/socket.io/socket.io.js"></script>
-<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
-<script>
-  var room = "room12345";
-  $(function () {
-    var socket = io('/nameSpace');
-    socket.on("connect", function(){
-      socket.emit("enter room", room);
-      socket.emit("fetch previous", room);
-    });
-    socket.on("fetch previous", function(prevMsg) {
-      for(var i=0; i < prevMsg.length; i++) {
-        $('#messages').append("<li><img src="+prevMsg[i].picDisplay+" />  "+prevMsg[i].displayName+" "+prevMsg[i].chatMessage +"");
-      }
-    })
-    $('form').submit(function(){
-      var loginDetails={  
-          msg : $('#m').val(),  
-          fb_userid : "<%=user.id%>",
-          fb_username : "<%=user.displayName%>"
-      };
-      socket.emit('chat message', loginDetails);
-      $('#m').val('');
-      return false;
-    });
-    socket.on('chat message', function(msg){
-        $('#messages').append('<li><img src="https://graph.facebook.com/'+msg.fb_userid+'/picture?width=40&height=40" /> '+msg.fb_username+' ' + msg.msg);
-    });
-  });
-</script>
+    <!--<% include ../partials/nav.ejs %>-->
+    <div class="container-fluid">
+        <ul id="messages"></ul>
+        <form action="">
+            <input id="m" autocomplete="off" /><button>Send</button>
+        </form>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+        var room = "room12345";
+        $(function() {
+            var socket = io('/nameSpace');
+            socket.on("connect", function() {
+                socket.emit("enter room", room);
+                socket.emit("fetch previous", room);
+            });
+            socket.on("fetch previous", function(prevMsg) {
+                for (var i = 0; i < prevMsg.length; i++) {
+                    var _htmltags = "<li><div><img src='" + prevMsg[i].picDisplay + "'/>" +
+                        "<p><strong>" + prevMsg[i].displayName + "</strong></p>" +
+                        "<p>" + prevMsg[i].chatMessage + "</p></div></li>";
+                    $('#messages').append(_htmltags);
+                }
+            })
+            $('form').submit(function() {
+                var loginDetails = {
+                    msg: $('#m').val(),
+                    fb_userid: "<%=user.id%>",
+                    fb_username: "<%=user.displayName%>"
+                };
+                socket.emit('chat message', loginDetails);
+                $('#m').val('');
+                return false;
+            });
+            socket.on('chat message', function(msg) {
+                var _htmltags = "<li>" +
+                    "<img src='https://graph.facebook.com/" + msg.fb_userid + "/picture?width=40&height=40'/>" +
+                    "<div><p><strong>" + msg.fb_username + "</strong></p>" +
+                    +"<p>" + msg.msg + "</p></div></li>";
+                $('#messages').append(_htmltags);
+            });
+        });
+    </script>
 </body>
+
 </html>
