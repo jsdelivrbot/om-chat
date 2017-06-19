@@ -134,38 +134,38 @@ var nameSpace = io.of('/nameSpace');
 
 /* USE THAT NAMESPACE */
 var rm = "";
+
 nameSpace.on('connection', function(socket) {
-    nameSpace.on('enter room', function(room) {
-        rm = room;
-        socket.join(room, function(err) {
-            if (err) throw err;
-        });
-    });
-    socket.on('chat message', function(msg) {
-        nameSpace.emit('chat message', msg);
-        var newchat = ChatModel({
-            fbId: msg.fb_userid,
-            displayName: msg.fb_username,
-            picDisplay: 'https://graph.facebook.com/' + msg.fb_userid + '/picture?width=40&height=40',
-            chatRoom: rm,
-            chatMessage: msg.msg
-        });
-        newchat.save(function(err) {
-            if (err) throw err;
-        });
-    });
+            nameSpace.on('enter room', function(room) {
+                rm = room;
+                socket.join(room, function(err) {
+                    if (err) throw err;
+                });
+            });
+            socket.on('chat message', function(msg) {
+                nameSpace.emit('chat message', msg);
+                var newchat = ChatModel({
+                    fbId: msg.fb_userid,
+                    displayName: msg.fb_username,
+                    picDisplay: 'https://graph.facebook.com/' + msg.fb_userid + '/picture?width=40&height=40',
+                    chatRoom: rm,
+                    chatMessage: msg.msg
+                });
+                newchat.save(function(err) {
+                    if (err) throw err;
+                });
 
-    socket.on('fetch previous', function(room) {
-        ChatModel.find({ chatRoom: { $eq: rm } }, 'displayName picDisplay chatMessage', function(err, data) {
-            if (err) throw err;
-            socket.emit('fetch previous', data);
-        });
-    });
-    socket.on('disconnect', function() {
-        //console.log('user disconnected');
-    });
-});
+                socket.on('fetch previous', function(room) {
+                    ChatModel.find({ chatRoom: { $eq: rm } }, 'displayName picDisplay chatMessage', function(err, data) {
+                        if (err) throw err;
+                        socket.emit('fetch previous', data);
+                    });
+                });
+                socket.on('disconnect', function() {
+                    //console.log('user disconnected');
+                });
+            });
 
-http.listen(app.get('port'), function() {
-    //console.log('Node app is running on port', app.get('port'));
-});
+            http.listen(app.get('port'), function() {
+                //console.log('Node app is running on port', app.get('port'));
+            });
