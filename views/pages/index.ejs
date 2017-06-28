@@ -1,30 +1,31 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <% include ../partials/header.ejs %>
 </head>
-
 <body>
-
-    <!--<% include ../partials/nav.ejs %>-->
+    <% include ../partials/nav.ejs %>
     <div class="container-fluid">
+        <input type="hidden" name="user_room" id="uroom" value="<%= user.room %>">
         <ul id="messages"></ul>
         <form action="">
             <input id="m" autocomplete="off" /><button>Send</button>
         </form>
     </div>
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <% include ../partials/footer.ejs %>
     <script>
-        var room = "room12345";
+        var room = $('#uroom').val();
+        var spltrm = room.split('_');
+        console.log(room);
+        console.log(spltrm[1]);
+        console.log(spltrm[2]);
         $(function() {
             var socket = io('/nameSpace');
             socket.on("connect", function() {
                 socket.emit("enter room", room);
-                socket.emit("fetch previous", room);
+                socket.emit("fetch previous1", room);
             });
-            socket.on("fetch previous", function(prevMsg) {
+            socket.on("fetch previous2", function(prevMsg) {
                 for (var i = 0; i < prevMsg.length; i++) {
                     var _htmltags = "<li><div><img src='" + prevMsg[i].picDisplay + "'/>" +
                         "<p><strong>" + prevMsg[i].displayName + "</strong></p>" +
@@ -35,8 +36,12 @@
             $('form').submit(function() {
                 var loginDetails = {
                     msg: $('#m').val(),
-                    fb_userid: "<%=user.id%>",
-                    fb_username: "<%=user.displayName%>"
+                    sender_id:"<%=user.id%>",
+                    fb_userid: "<%=user.fbid%>",
+                    fb_img: "<%=user.fbimg%>",
+                    fb_username: "<%=user.name%>",
+                    room:room,
+                    receiver_id:spltrm[1]
                 };
                 socket.emit('chat message', loginDetails);
                 $('#m').val('');

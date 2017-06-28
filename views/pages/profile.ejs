@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <% include ../partials/header.ejs %>
+</head>
+<body>
+<% include ../partials/nav.ejs %>
+<div class="container">
+    <h3>Profile Details</h3>
+    <h5>Name : <%= user.name %></h5>
+    <h5><img class="img img-circle" src="https://graph.facebook.com/<%= user.fbid %>/picture?width=100&height=100"> </h5>
+</div>
+<% include ../partials/footer.ejs %>
+</body>
+</html>

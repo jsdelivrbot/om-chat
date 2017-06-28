@@ -7,14 +7,6 @@ var chatSchema = new Schema({
         type: String,
         require: true
     },
-    displayName: {
-        type: String,
-        require: true
-    },
-    picDisplay: {
-        type: String,
-        require: true
-    },
     chatRoom: {
         type: String,
         require: true
@@ -22,7 +14,15 @@ var chatSchema = new Schema({
     chatMessage: {
         type: String,
         require: true
-    }
+    },
+    chatTo: {
+        type: String,
+        require: true
+    },
+    chatDate: {
+        type: Date,
+        require: true
+    },
 });
 var ChatModel = mongoose.model("chat", chatSchema);
 module.exports = ChatModel;
