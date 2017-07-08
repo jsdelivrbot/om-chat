@@ -12,7 +12,7 @@ var ChatModel = require('./models/ChatModel.js');
 var GroupModel = require('./models/GroupModel.js');
 var ConnectModel = require('./models/ConnectModel.js');
 var usernames = {};
-app.set('port', (process.env.PORT || 3003));
+app.set('port', (process.env.PORT || 5000));
 app.use('/public', express.static(path.join(__dirname, 'public')))
 app.set('views', __dirname + '/views'); // views is directory for all template files
 app.set('view engine', 'ejs');
