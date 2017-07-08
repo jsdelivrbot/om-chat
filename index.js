@@ -16,31 +16,32 @@ app.set('port', (process.env.PORT || 80));
 app.use('/public', express.static(path.join(__dirname, 'public')))
 app.set('views', __dirname + '/views'); // views is directory for all template files
 app.set('view engine', 'ejs');
-app.set('fb-callbackurl', 'https://om-chat.herokuapp.com/login/facebook/return');
 app.set('express-secret', 'TRR36PDTHB9XBHCPPYQKGBPKQ');
+app.set('fb-callbackurl', 'https://om-chat.herokuapp.com/login/facebook/return');
 app.set('mongo-db-url', 'mongodb://root:root@ds125262.mlab.com:25262/heroku_042ngn9t');
-app.set('mongo-db-auoinc', 'mongodb://root:root@ds125262.mlab.com:25262/heroku_042ngn9t');
 app.set('fb-appid', '131568380325049');
 app.set('fb-appsecret', '955090e0aac14c9751adf91e11d7419f')
+
+app.set('groupLimit','25')
+
 app.set('fb-callbacklocal', 'http://www.nodechat.dev/login/facebook/return')
 app.set('mongo-db-urllocal', 'mongodb://127.0.0.1:27017/chat')
 app.set('fb-appidlocal', '312638455759153')
 app.set('fb-appsecretlocal', '661e41cbc07ff112e9f35fbb1a36a4ce')
-app.set('groupLimit','25')
 //'https://om-chat.herokuapp.com/login/facebook/return'
 //http://localhost:5000/login/facebook/return
 //mongodb://127.0.0.1:27017/chat
 //mongodb://root:root@ds125262.mlab.com:25262/heroku_042ngn9t
-var mongoDB = app.get('mongo-db-urllocal');
+var mongoDB = app.get('mongo-db-url');
 mongoose.connect(mongoDB);
 //Get the default connection
 db = mongoose.connection;
 db.on('error', console.error.bind(console, 'DB Connection Error'));
 //Bind connection to error event (to get notification of connection errors)
 passport.use(new Strategy({
-    clientID: app.get('fb-appidlocal'),
-    clientSecret: app.get('fb-appsecretlocal'),
-    callbackURL: app.get('fb-callbacklocal')
+    clientID: app.get('fb-appid'),
+    clientSecret: app.get('fb-appsecret'),
+    callbackURL: app.get('fb-callbackurl')
 },function(accessToken, refreshToken, profile, cb) {
     // In this example, the user's Facebook profile is supplied as the user
     // record.  In a production-quality application, the Facebook profile should
