@@ -1,40 +1,49 @@
+/**
+ * Created by racchanak on 3/7/17.
+ */
 var mongoose = require('mongoose');
 var assert = require('assert');
 var Schema = mongoose.Schema;
 
-var chatSchema = new Schema({
-    chatFrom: {
+var groupSchema = new Schema({
+    groupId: {
         type: String,
         require: true
     },
-    chatFrom_fbid: {
+    groupName: {
         type: String,
         require: true
     },
-    chatFrom_img: {
+    groupImg: {
         type: String,
         require: true
     },
-    chatFrom: {
+    groupAdmin: {
         type: String,
         require: true
     },
-    chatRoom: {
+    groupRoom: {
         type: String,
         require: true
     },
-    chatMessage: {
+    groupCounts: {
         type: String,
         require: true
     },
-    chatTo: {
+    groupStatus: {
         type: String,
-        require: true
+        enum : ['Activate','Deactivate'],
+        default: 'Activate'
     },
-    chatDate: {
+    groupDate: {
         type: Date,
         require: true
+    },
+    groupDelete: {
+        type: String,
+        enum : ['No','Yes'],
+        default: 'No'
     }
 });
-var ChatModel = mongoose.model("chat", chatSchema);
-module.exports = ChatModel;
+var GroupModel = mongoose.model("group", groupSchema);
+module.exports = GroupModel;

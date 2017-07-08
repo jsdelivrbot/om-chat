@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <% include ../partials/header.ejs %>
+</head>
+<body>
+<% include ../partials/nav.ejs %>
+<div class="container">
+    <h3>Contact List</h3>
+    <ul class="contactlist">
+        <% for(var i=0; i < user.length; i++) { %>
+            <li>
+                <a href="/message/<%= user[i].userId %>"><span>
+                    <img class="img img-circle" src="<%= user[i].displayimage %>">
+                    <h3><%= user[i].displayName %></h3>
+                </span></a>
+            </li>            
+        <% } %>
+    </ul>
+</div>
+<% include ../partials/footer.ejs %>
+</body>
+</html>

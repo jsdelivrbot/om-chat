@@ -9,8 +9,10 @@ var mongoose = require('mongoose');
 var assert = require('assert');
 var UserModel = require('./models/UserModel.js');
 var ChatModel = require('./models/ChatModel.js');
+var GroupModel = require('./models/GroupModel.js');
+var ConnectModel = require('./models/ConnectModel.js');
 var usernames = {};
-app.set('port', (process.env.PORT || 5000));
+app.set('port', (process.env.PORT || 80));
 app.use('/public', express.static(path.join(__dirname, 'public')))
 app.set('views', __dirname + '/views'); // views is directory for all template files
 app.set('view engine', 'ejs');
@@ -20,10 +22,11 @@ app.set('mongo-db-url', 'mongodb://root:root@ds125262.mlab.com:25262/heroku_042n
 app.set('mongo-db-auoinc', 'mongodb://root:root@ds125262.mlab.com:25262/heroku_042ngn9t');
 app.set('fb-appid', '131568380325049');
 app.set('fb-appsecret', '955090e0aac14c9751adf91e11d7419f')
-app.set('fb-callbacklocal', 'http://192.168.2.222:5000/login/facebook/return')
+app.set('fb-callbacklocal', 'http://www.nodechat.dev/login/facebook/return')
 app.set('mongo-db-urllocal', 'mongodb://127.0.0.1:27017/chat')
 app.set('fb-appidlocal', '312638455759153')
 app.set('fb-appsecretlocal', '661e41cbc07ff112e9f35fbb1a36a4ce')
+app.set('groupLimit','25')
 //'https://om-chat.herokuapp.com/login/facebook/return'
 //http://localhost:5000/login/facebook/return
 //mongodb://127.0.0.1:27017/chat
@@ -131,8 +134,10 @@ app.get('/profile',function(req, res){
 app.get('/contactlist',function(req, res){
     if(user) {
         var temp = [];
-        temp.name = user.name;
+        temp.id = user.id;
         temp.fbid = user.fbid;
+        temp.fbimg = user.fbimg;
+        temp.name = user.name;
         var userMap = {};
         UserModel.find({}, function (err, users) {
             users.forEach(function (user) {
@@ -148,9 +153,36 @@ app.get('/contactlist',function(req, res){
         res.redirect('/');
     }
 });
+app.get('/group',function(req, res){
+    if(user) {
+        var temp = [];
+        temp.id = user.id;
+        temp.fbid = user.fbid;
+        temp.fbimg = user.fbimg;
+        temp.name = user.name;
+        GroupModel.find({}, function (err, groups) {
+            groups.forEach(function (group) {
+                var groupMap = {};
+                groupMap = group;
+                temp.push(groupMap)
+            });
+            res.render('pages/group', {user: temp});
+        });
+    } else {
+        res.redirect('/');
+    }
+});
 app.get('/message/:userid',function (req,res) {
     if(user) {
         user.room = 'rm_'+ req.params.userid+'_'+user.id; //rm_[recevierid]_[senderid]
+        res.render('pages/index', {user: user});
+    } else {
+        res.redirect('/');
+    }
+});
+app.get('/groupmsg/:grouproom',function (req,res) {
+    if(user) {
+        user.room = req.params.grouproom; //rm_[recevierid]_[senderid]
         res.render('pages/index', {user: user});
     } else {
         res.redirect('/');
@@ -167,7 +199,6 @@ app.get('/logout',function (req,res) {
     user= {};
     req.logOut()  // <-- not req.logout();
     res.redirect('/')
-
 });
 /*
 Create namespace and rooms
@@ -184,25 +215,58 @@ nameSpace.on('connection', function(socket) {
     });
     socket.on('chat message', function (msg) {
         nameSpace.emit('chat message', msg);
-        console.log(msg);
-        change this part
+
         var chat_data = {
-            fbId: msg.fb_userid,
-            displayName: msg.fb_username,
-            picDisplay: 'https://graph.facebook.com/' + msg.fb_userid + '/picture?width=40&height=40',
-            chatRoom: msg.room,
-            chatMessage: msg.msg
-        };
-        console.log(chat_data);
+            chatFrom: msg.sender_id,
+            chatFrom_fbid: msg.fb_userid,
+            chatFrom_img: msg.fbimg,
+            chatFrom_name: msg.name,
+            chatTo:msg.receiver_id,
+            chatRoom:msg.room,
+            chatMessage:msg.msg,
+            chatDate:msg.creat_date
+        }
+
         var newchat = ChatModel(chat_data);
         newchat.save(function (err) {
             if (err) throw err;
         });
     });
-    socket.on('fetch previous1', function (room) {
+
+    socket.on('add group', function (grp) {
+        GroupModel.find({}, function(err, groups) {
+            GroupModel.find({groupName: {$eq: grp.group_name}}, function (err, data) {
+                var count = '';
+                if (data.length == 0) {
+                    count = (groups.length) + 1;
+                    var group_data = {
+                        groupId: count,
+                        groupName: grp.group_name,
+                        groupAdmin: grp.group_admin,
+                        groupRoom: grp.group_room,
+                        groupCounts: grp.group_count,
+                        groupDate:grp.creat_date
+                    }
+                    var newgroup = GroupModel(group_data);
+                    newgroup.save(function (err) {
+                        if (err) throw err;
+                        nameSpace.emit('add group', grp);
+                        console.log('group_data added');
+                    });
+                } else {
+                    console.log('already exists');
+                }
+            });
+        });
+        // var newchat = GroupModel(chat_data);
+        // newchat.save(function (err) {
+        //     if (err) throw err;
+        // });
+    });
+    socket.on('fetch previous', function (room) {
         ChatModel.find({chatRoom: {$eq: room}}, 'displayName picDisplay chatMessage', function (err, data) {
             if (err) throw err;
-            socket.emit('fetch previous2', data);
+            socket.emit('fetch previous', data);
         });
     });
     socket.on('disconnect', function () {

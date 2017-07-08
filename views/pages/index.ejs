@@ -8,54 +8,11 @@
     <div class="container-fluid">
         <input type="hidden" name="user_room" id="uroom" value="<%= user.room %>">
         <ul id="messages"></ul>
-        <form action="">
+        <form action="" id="sendmsg">
             <input id="m" autocomplete="off" /><button>Send</button>
         </form>
     </div>
     <% include ../partials/footer.ejs %>
-    <script>
-        var room = $('#uroom').val();
-        var spltrm = room.split('_');
-        console.log(room);
-        console.log(spltrm[1]);
-        console.log(spltrm[2]);
-        $(function() {
-            var socket = io('/nameSpace');
-            socket.on("connect", function() {
-                socket.emit("enter room", room);
-                socket.emit("fetch previous1", room);
-            });
-            socket.on("fetch previous2", function(prevMsg) {
-                for (var i = 0; i < prevMsg.length; i++) {
-                    var _htmltags = "<li><div><img src='" + prevMsg[i].picDisplay + "'/>" +
-                        "<p><strong>" + prevMsg[i].displayName + "</strong></p>" +
-                        "<p>" + prevMsg[i].chatMessage + "</p></div></li>";
-                    $('#messages').append(_htmltags);
-                }
-            })
-            $('form').submit(function() {
-                var loginDetails = {
-                    msg: $('#m').val(),
-                    sender_id:"<%=user.id%>",
-                    fb_userid: "<%=user.fbid%>",
-                    fb_img: "<%=user.fbimg%>",
-                    fb_username: "<%=user.name%>",
-                    room:room,
-                    receiver_id:spltrm[1]
-                };
-                socket.emit('chat message', loginDetails);
-                $('#m').val('');
-                return false;
-            });
-            socket.on('chat message', function(msg) {
-                var _htmltags = "<li>" +
-                    "<img src='https://graph.facebook.com/" + msg.fb_userid + "/picture?width=40&height=40'/>" +
-                    "<div><p><strong>" + msg.fb_username + "</strong></p>" +
-                    +"<p>" + msg.msg + "</p></div></li>";
-                $('#messages').append(_htmltags);
-            });
-        });
-    </script>
+    <script type="text/javascript" src="/public/javascript/ajax.js"></script>
 </body>
-
 </html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <% include ../partials/header.ejs %>
+</head>
+<body>
+<% include ../partials/nav.ejs %>
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <h3>Own Group List</h3>
+            <ul class="contactlist">
+                <% for(var i=0; i < user.length; i++) { %>
+                <li>
+                    <a href="/message/<%= user[i].groupRoom %>"><span>
+                    <!--<img class="img img-circle" src="<%= user[i].displayimage %>">-->
+                    <h3><%= user[i].groupName %></h3>
+                </span></a>
+                </li>
+                <li><%= user[i] %></li>
+                <% } %>
+                <li id="dynamicadd"></li>
+            </ul>
+        </div>
+        <div class="col-md-4 text-right">
+            <h3>Add Group</h3>
+            <form name="group" id="group" method="POST">
+                <span class="error5" style="color: #f00000;"></span>
+                <div class="field-holder clearfix" style="padding: 10px;">
+                    Name : <input name="gname" id="gname" type="text">
+                </div>
+                <div class="field-holder field-holder-new">
+                    <button>Upload</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<% include ../partials/footer.ejs %>
+<script type="text/javascript" src="/public/javascript/ajax.js"></script>
+</body>
+</html>
